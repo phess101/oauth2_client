@@ -82,7 +82,7 @@ void main() {
         'code_verifier': codeVerifier,
       };
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: tokenParams, headers: captureAnyNamed('headers')))
           .thenAnswer((_) async => http.Response(
               '{"access_token": "' +
@@ -99,7 +99,7 @@ void main() {
           codeVerifier: codeVerifier);
 
       expect(
-          verify(httpClient.post(tokenUrl,
+          verify(httpClient.post(Uri.parse(tokenUrl),
                   body: tokenParams, headers: captureAnyNamed('headers')))
               .captured[0],
           {});
@@ -123,7 +123,7 @@ void main() {
         'code_verifier': codeVerifier,
       };
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: tokenParams, headers: captureAnyNamed('headers')))
           .thenAnswer((_) async => http.Response(
               '{"access_token": "' +
@@ -140,7 +140,7 @@ void main() {
           codeVerifier: codeVerifier);
 
       expect(
-          verify(httpClient.post(tokenUrl,
+          verify(httpClient.post(Uri.parse(tokenUrl),
                   body: tokenParams, headers: captureAnyNamed('headers')))
               .captured[0],
           {'test': '42'});
@@ -162,7 +162,7 @@ void main() {
         // 'client_secret': clientSecret
       };
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: tokenParams, headers: captureAnyNamed('headers')))
           .thenAnswer((_) async => http.Response('', 404));
 
@@ -202,7 +202,7 @@ void main() {
         // 'client_secret': clientSecret
       };
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: tokenParams, headers: captureAnyNamed('headers')))
           .thenAnswer((_) async => http.Response(
               '{"access_token": "' +
@@ -227,7 +227,8 @@ void main() {
           codeVerifier: codeVerifier,
           authCodeParams: {'testParam': 'testVal'});
 
-      expect(tknResponse.accessToken, accessToken);
+      expect(tknResponse != null, true);
+      expect(tknResponse!.accessToken, accessToken);
     });
 
     test('Authorization code flow with callback', () async {
@@ -255,7 +256,7 @@ void main() {
         // 'client_secret': clientSecret
       };
 
-      when(httpClient.post('https://test.token.url',
+      when(httpClient.post(Uri.parse('https://test.token.url'),
               body: tokenParams, headers: captureAnyNamed('headers')))
           .thenAnswer((_) async => http.Response(
               '{"access_token": "' +
@@ -290,7 +291,7 @@ void main() {
     test('Refresh token', () async {
       final httpClient = HttpClientMock();
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: {
                 'grant_type': 'refresh_token',
                 'refresh_token': refreshToken,
@@ -310,7 +311,7 @@ void main() {
           httpClient: httpClient);
 
       expect(
-          verify(httpClient.post(tokenUrl,
+          verify(httpClient.post(Uri.parse(tokenUrl),
                   body: captureAnyNamed('body'),
                   headers: captureAnyNamed('headers')))
               .captured[1],
@@ -323,7 +324,7 @@ void main() {
     test('Error in refreshing token', () async {
       final httpClient = HttpClientMock();
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: {
                 'grant_type': 'refresh_token',
                 'refresh_token': refreshToken,
@@ -337,7 +338,7 @@ void main() {
           httpClient: httpClient);
 
       expect(
-          verify(httpClient.post(tokenUrl,
+          verify(httpClient.post(Uri.parse(tokenUrl),
                   body: captureAnyNamed('body'),
                   headers: captureAnyNamed('headers')))
               .captured[1],
@@ -549,7 +550,7 @@ void main() {
         // 'scope': scopes
       };
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: authParams, headers: captureAnyNamed('headers')))
           .thenAnswer((_) async => http.Response(
               '{"access_token": "' +
@@ -566,7 +567,7 @@ void main() {
           httpClient: httpClient);
 
       expect(
-          verify(httpClient.post(tokenUrl,
+          verify(httpClient.post(Uri.parse(tokenUrl),
                   body: captureAnyNamed('body'),
                   headers: captureAnyNamed('headers')))
               .captured[1],
@@ -583,7 +584,7 @@ void main() {
         // 'scope': scopes
       };
 
-      when(httpClient.post(tokenUrl,
+      when(httpClient.post(Uri.parse(tokenUrl),
               body: authParams, headers: captureAnyNamed('headers')))
           .thenAnswer((_) async => http.Response('', 404));
 
@@ -594,7 +595,7 @@ void main() {
           httpClient: httpClient);
 
       expect(
-          verify(httpClient.post(tokenUrl,
+          verify(httpClient.post(Uri.parse(tokenUrl),
                   body: captureAnyNamed('body'),
                   headers: captureAnyNamed('headers')))
               .captured[1],
@@ -656,7 +657,7 @@ void main() {
     test('Access token revocation', () async {
       final httpClient = HttpClientMock();
 
-      when(httpClient.post(revokeUrl, body: {
+      when(httpClient.post(Uri.parse(revokeUrl), body: {
         'token': accessToken,
         'token_type_hint': 'access_token',
         'client_id': clientId
@@ -682,7 +683,7 @@ void main() {
     test('Refresh token revocation', () async {
       final httpClient = HttpClientMock();
 
-      when(httpClient.post(revokeUrl,
+      when(httpClient.post(Uri.parse(revokeUrl),
               body: {
                 'token': refreshToken,
                 'token_type_hint': 'refresh_token',
@@ -711,7 +712,7 @@ void main() {
     test('Revoke both Access and Refresh token', () async {
       final httpClient = HttpClientMock();
 
-      when(httpClient.post(revokeUrl,
+      when(httpClient.post(Uri.parse(revokeUrl),
               body: {
                 'token': accessToken,
                 'token_type_hint': 'access_token',
@@ -720,7 +721,7 @@ void main() {
               headers: anyNamed('headers')))
           .thenAnswer((_) async => http.Response('{}', 200));
 
-      when(httpClient.post(revokeUrl,
+      when(httpClient.post(Uri.parse(revokeUrl),
               body: {
                 'token': refreshToken,
                 'token_type_hint': 'refresh_token',
@@ -749,7 +750,7 @@ void main() {
     test('Error in token revocation(1)', () async {
       final httpClient = HttpClientMock();
 
-      when(httpClient.post(revokeUrl,
+      when(httpClient.post(Uri.parse(revokeUrl),
               body: {
                 'token': accessToken,
                 'token_type_hint': 'access_token',
@@ -759,7 +760,7 @@ void main() {
           .thenAnswer((_) async =>
               http.Response('{"error": "access token revocation error"}', 404));
 
-      when(httpClient.post(revokeUrl,
+      when(httpClient.post(Uri.parse(revokeUrl),
               body: {
                 'token': refreshToken,
                 'token_type_hint': 'refresh_token',
@@ -788,7 +789,7 @@ void main() {
     test('Error in token revocation(2)', () async {
       final httpClient = HttpClientMock();
 
-      when(httpClient.post(revokeUrl,
+      when(httpClient.post(Uri.parse(revokeUrl),
               body: {
                 'token': accessToken,
                 'token_type_hint': 'access_token',
@@ -797,7 +798,7 @@ void main() {
               headers: anyNamed('headers')))
           .thenAnswer((_) async => http.Response('{}', 200));
 
-      when(httpClient.post(revokeUrl,
+      when(httpClient.post(Uri.parse(revokeUrl),
               body: {
                 'token': refreshToken,
                 'token_type_hint': 'refresh_token',

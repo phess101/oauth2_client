@@ -30,34 +30,34 @@ import 'package:random_string/random_string.dart';
 ///   </intent-filter>
 /// </activity>
 class OAuth2Client {
-  String redirectUri;
-  String customUriScheme;
+  late String redirectUri;
+  late String customUriScheme;
 
-  String tokenUrl;
-  String refreshUrl;
-  String revokeUrl;
-  String authorizeUrl;
+  late String tokenUrl;
+  String? refreshUrl;
+  String? revokeUrl;
+  late String authorizeUrl;
 
-  Map<String, String> _accessTokenRequestHeaders;
+  Map<String, String>? _accessTokenRequestHeaders;
 
-  WebAuth webAuthClient;
+  WebAuth? webAuthClient;
 
   OAuth2Client(
-      {@required this.authorizeUrl,
-      @required this.tokenUrl,
+      {required this.authorizeUrl,
+      required this.tokenUrl,
       this.refreshUrl,
       this.revokeUrl,
-      @required this.redirectUri,
-      @required this.customUriScheme}) {
+      required this.redirectUri,
+      required this.customUriScheme}) {
     webAuthClient = WebAuth();
   }
 
   /// Requests an Access Token to the OAuth2 endpoint using the Implicit grant flow (https://tools.ietf.org/html/rfc6749#page-31)
   Future<AccessTokenResponse> getTokenWithImplicitGrantFlow({
-    @required String clientId,
-    List<String> scopes,
+    required String clientId,
+    List<String>? scopes,
     bool enableState = true,
-    String state,
+    String? state,
     httpClient,
     webAuthClient,
   }) async {
@@ -71,7 +71,7 @@ class OAuth2Client {
         responseType: 'token',
         scopes: scopes,
         enableState: enableState,
-        state: state,
+        state: state!,
         redirectUri: redirectUri);
 
     // Present the dialog to the user
@@ -98,23 +98,23 @@ class OAuth2Client {
   }
 
   /// Requests an Access Token to the OAuth2 endpoint using the Authorization Code Flow.
-  Future<AccessTokenResponse> getTokenWithAuthCodeFlow({
-    @required String clientId,
-    List<String> scopes,
-    String clientSecret,
+  Future<AccessTokenResponse?> getTokenWithAuthCodeFlow({
+    required String clientId,
+    List<String>? scopes,
+    String? clientSecret,
     bool enablePKCE = true,
     bool enableState = true,
-    String state,
-    String codeVerifier,
-    Function afterAuthorizationCodeCb,
-    Map<String, dynamic> authCodeParams,
-    Map<String, dynamic> accessTokenParams,
+    String? state,
+    String? codeVerifier,
+    Function? afterAuthorizationCodeCb,
+    Map<String, dynamic>? authCodeParams,
+    Map<String, dynamic>? accessTokenParams,
     httpClient,
     webAuthClient,
   }) async {
-    AccessTokenResponse tknResp;
+    AccessTokenResponse? tknResp;
 
-    String codeChallenge;
+    var codeChallenge = '';
 
     if (enablePKCE) {
       codeVerifier ??= randomAlphaNumeric(80);
@@ -129,19 +129,19 @@ class OAuth2Client {
         codeChallenge: codeChallenge,
         enableState: enableState,
         state: state,
-        customParams: authCodeParams);
+        customParams: authCodeParams ?? {});
 
     if (authResp.isAccessGranted()) {
       if (afterAuthorizationCodeCb != null) afterAuthorizationCodeCb(authResp);
 
       tknResp = await requestAccessToken(
           httpClient: httpClient,
-          code: authResp.code,
+          code: authResp.code!,
           clientId: clientId,
           scopes: scopes,
           clientSecret: clientSecret,
-          codeVerifier: codeVerifier,
-          customParams: accessTokenParams);
+          codeVerifier: codeVerifier!,
+          customParams: accessTokenParams ?? {});
     }
 
     return tknResp;
@@ -149,9 +149,9 @@ class OAuth2Client {
 
   /// Requests an Access Token to the OAuth2 endpoint using the Client Credentials flow.
   Future<AccessTokenResponse> getTokenWithClientCredentialsFlow(
-      {@required String clientId,
-      @required String clientSecret,
-      List<String> scopes,
+      {required String clientId,
+      required String clientSecret,
+      List<String>? scopes,
       httpClient}) async {
     var params = <String, String>{'grant_type': 'client_credentials'};
 
@@ -170,12 +170,12 @@ class OAuth2Client {
 
   /// Requests an Authorization Code to be used in the Authorization Code grant.
   Future<AuthorizationResponse> requestAuthorization({
-    @required String clientId,
-    List<String> scopes,
-    String codeChallenge,
+    required String clientId,
+    List<String>? scopes,
+    String? codeChallenge,
     bool enableState = true,
-    String state,
-    Map<String, dynamic> customParams,
+    String? state,
+    Map<String, dynamic>? customParams,
     webAuthClient,
   }) async {
     webAuthClient ??= this.webAuthClient;
@@ -189,9 +189,9 @@ class OAuth2Client {
         redirectUri: redirectUri,
         scopes: scopes,
         enableState: enableState,
-        state: state,
-        codeChallenge: codeChallenge,
-        customParams: customParams);
+        state: state!,
+        codeChallenge: codeChallenge ?? '',
+        customParams: customParams ?? {});
 
     // Present the dialog to the user
     final result = await webAuthClient.authenticate(
@@ -202,12 +202,12 @@ class OAuth2Client {
 
   /// Requests and Access Token using the provided Authorization [code].
   Future<AccessTokenResponse> requestAccessToken(
-      {@required String code,
-      @required String clientId,
-      String clientSecret,
-      String codeVerifier,
-      List<String> scopes,
-      Map<String, dynamic> customParams,
+      {required String code,
+      required String clientId,
+      String? clientSecret,
+      String? codeVerifier,
+      List<String>? scopes,
+      Map<String, dynamic>? customParams,
       httpClient}) async {
     final params = getTokenUrlParams(
         code: code,
@@ -229,7 +229,7 @@ class OAuth2Client {
 
   /// Refreshes an Access Token issuing a refresh_token grant to the OAuth2 server.
   Future<AccessTokenResponse> refreshToken(String refreshToken,
-      {httpClient, String clientId, String clientSecret}) async {
+      {httpClient, String? clientId, String? clientSecret}) async {
     final Map params = getRefreshUrlParams(refreshToken: refreshToken);
 
     var response = await _performAuthorizedRequest(
@@ -244,7 +244,7 @@ class OAuth2Client {
 
   /// Revokes both the Access and the Refresh tokens in the provided [tknResp]
   Future<OAuth2Response> revokeToken(AccessTokenResponse tknResp,
-      {String clientId, String clientSecret, httpClient}) async {
+      {String? clientId, String? clientSecret, httpClient}) async {
     var tokenRevocationResp = await revokeAccessToken(tknResp,
         clientId: clientId, clientSecret: clientSecret, httpClient: httpClient);
     if (tokenRevocationResp.isValid()) {
@@ -259,28 +259,28 @@ class OAuth2Client {
 
   /// Revokes the Access Token in the provided [tknResp]
   Future<OAuth2Response> revokeAccessToken(AccessTokenResponse tknResp,
-      {String clientId, String clientSecret, httpClient}) async {
+      {String? clientId, String? clientSecret, httpClient}) async {
     return await _revokeTokenByType(tknResp, 'access_token',
         clientId: clientId, clientSecret: clientSecret, httpClient: httpClient);
   }
 
   /// Revokes the Refresh Token in the provided [tknResp]
   Future<OAuth2Response> revokeRefreshToken(AccessTokenResponse tknResp,
-      {String clientId, String clientSecret, httpClient}) async {
+      {String? clientId, String? clientSecret, httpClient}) async {
     return await _revokeTokenByType(tknResp, 'refresh_token',
         clientId: clientId, clientSecret: clientSecret, httpClient: httpClient);
   }
 
   /// Generates the url to be used for fetching the authorization code.
   String getAuthorizeUrl(
-      {@required String clientId,
+      {required String clientId,
       String responseType = 'code',
-      String redirectUri,
-      List<String> scopes,
+      String? redirectUri,
+      List<String>? scopes,
       bool enableState = true,
-      String state,
-      String codeChallenge,
-      Map<String, dynamic> customParams}) {
+      String? state,
+      String? codeChallenge,
+      Map<String, dynamic>? customParams}) {
     final params = <String, dynamic>{
       'response_type': responseType,
       'client_id': clientId
@@ -310,10 +310,10 @@ class OAuth2Client {
 
   /// Returns the parameters needed for the authorization code request
   Map<String, dynamic> getTokenUrlParams(
-      {@required String code,
-      String redirectUri,
-      String codeVerifier,
-      Map<String, dynamic> customParams}) {
+      {required String code,
+      String? redirectUri,
+      String? codeVerifier,
+      Map<String, dynamic>? customParams}) {
     final params = <String, dynamic>{
       'grant_type': 'authorization_code',
       'code': code
@@ -346,15 +346,16 @@ class OAuth2Client {
   /// Performs a post request to the specified [url],
   /// adding authentication credentials as described here: https://tools.ietf.org/html/rfc6749#section-2.3
   Future<http.Response> _performAuthorizedRequest(
-      {@required String url,
-      @required String clientId,
-      String clientSecret,
-      Map params,
-      Map<String, String> headers,
+      {required String url,
+      String? clientId,
+      String? clientSecret,
+      Map? params,
+      Map<String, String>? headers,
       httpClient}) async {
     httpClient ??= http.Client();
 
     headers ??= {};
+    params ??= {};
 
     //If a client secret has been specified, it will be sent in the "Authorization" header instead of a body parameter...
     if (clientSecret == null || clientSecret.isEmpty) {
@@ -367,13 +368,14 @@ class OAuth2Client {
       headers.addAll(authHeaders);
     }
 
-    var response = await httpClient.post(url, body: params, headers: headers);
+    var response =
+        await httpClient.post(Uri.parse(url), body: params, headers: headers);
 
     return response;
   }
 
   Map<String, String> getAuthorizationHeader(
-      {String clientId, String clientSecret}) {
+      {String? clientId, String? clientSecret}) {
     var headers = <String, String>{};
 
     if ((clientId != null && clientId.isNotEmpty) &&
@@ -389,7 +391,7 @@ class OAuth2Client {
 
   /// Returns the parameters needed for the refresh token request
   Map<String, String> getRefreshUrlParams(
-      {@required String refreshToken, String clientId, String clientSecret}) {
+      {required String refreshToken, String? clientId, String? clientSecret}) {
     final params = <String, String>{
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken
@@ -416,7 +418,7 @@ class OAuth2Client {
   /// Revokes the specified token [type] in the [tknResp]
   Future<OAuth2Response> _revokeTokenByType(
       AccessTokenResponse tknResp, String tokenType,
-      {String clientId, String clientSecret, httpClient}) async {
+      {String? clientId, String? clientSecret, httpClient}) async {
     var resp = OAuth2Response();
 
     if (revokeUrl == null) return resp;
@@ -433,7 +435,8 @@ class OAuth2Client {
       if (clientId != null) params['client_id'] = clientId;
       if (clientSecret != null) params['client_secret'] = clientSecret;
 
-      http.Response response = await httpClient.post(revokeUrl, body: params);
+      http.Response response =
+          await httpClient.post(Uri.parse(revokeUrl!), body: params);
 
       resp = OAuth2Response.fromHttpResponse(response);
     }
