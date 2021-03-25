@@ -154,9 +154,11 @@ packages:
   flutter_web_auth:
     dependency: "direct main"
     description:
-      path: "\\Clients\\Luup\\flutter_web_auth"
-      relative: false
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "6b98d544455ccd667a957228920ce9a7d3d30421"
+      url: "https://github.com/phess101/flutter_web_auth"
+    source: git
     version: "0.3.0"
   glob:
     dependency: transitive

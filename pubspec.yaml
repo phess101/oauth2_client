@@ -4,6 +4,7 @@ version: 1.7.1
 # author: TeraNet srl<info@teranet.it>
 homepage: https://github.com/teranetsrl/oauth2_client
 repository: https://github.com/teranetsrl/oauth2_client
+publish_to: none
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -14,7 +15,8 @@ dependencies:
   meta: ^1.1.8
   http: ^0.13.0
   flutter_web_auth:
-    path: '\Clients\Luup\flutter_web_auth'
+    git:
+      url: https://github.com/phess101/flutter_web_auth
   random_string: ^2.2.0-nullsafety
   crypto: ^3.0.0
 
