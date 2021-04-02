@@ -7,9 +7,9 @@ import 'package:oauth2_client/oauth2_response.dart';
 /// see https://tools.ietf.org/html/rfc6749#section-5.2
 
 class AccessTokenResponse extends OAuth2Response {
-  late String? id;
   late String accessToken;
   late String tokenType;
+  String? id;
   int? expiresIn;
   String? refreshToken;
   List<String>? scope;
