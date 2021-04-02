@@ -7,6 +7,7 @@ import 'package:oauth2_client/oauth2_response.dart';
 /// see https://tools.ietf.org/html/rfc6749#section-5.2
 
 class AccessTokenResponse extends OAuth2Response {
+  late String? id;
   late String accessToken;
   late String tokenType;
   int? expiresIn;
@@ -22,6 +23,7 @@ class AccessTokenResponse extends OAuth2Response {
       if (map.keys.contains('authed_user')) {
         final user = map['authed_user'] as Map<String, dynamic>;
         accessToken = user['access_token'];
+        id = user['id'];
       } else {
         accessToken = map['access_token'];
       }
@@ -106,6 +108,7 @@ class AccessTokenResponse extends OAuth2Response {
       'token_type': tokenType,
       'refresh_token': refreshToken,
       'scope': scope,
+      'id': id,
       'expires_in': expirationDate != null
           ? expirationDate!.difference(now).inSeconds
           : null,
